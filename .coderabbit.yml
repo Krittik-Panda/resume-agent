@@ -1,0 +1,85 @@
+version: 1
+
+github:
+  pull_request:
+    enabled: true
+    drafts: false
+
+review:
+  max_review_comments: 50
+  comment_style: suggestions
+  summarize_changes: true
+  require_tests: false
+
+  checks:
+    - name: "readability"
+      enabled: true
+    - name: "maintainability"
+      enabled: true
+    - name: "security"
+      enabled: true
+    - name: "performance"
+      enabled: true
+    - name: "documentation"
+      enabled: true
+    - name: "testing"
+      enabled: true
+
+  tech_stack:
+    - javascript
+    - typescript
+    - react
+    - nextjs
+    - nodejs
+    - python
+
+  include:
+    - "frontend/**"
+    - "agents/**"
+    - "workflows/**"
+    - "data/**"
+    - "scripts/**"
+
+  exclude:
+    - "node_modules/**"
+    - ".next/**"
+    - "dist/**"
+    - "build/**"
+    - "*.lock"
+    - "data/generated/**"
+
+style:
+  prefer_const: true
+  prefer_strict_typescript: true
+  no_console_logs: false
+  max_function_length: 80
+
+documentation:
+  public_functions_require_docs: true
+  min_docstring_quality: "normal"
+
+tests:
+  required_coverage: 0
+  suggest_missing_tests: true
+
+messages:
+  onboarding_comment: |
+    Thanks for opening this PR! 👋
+    CodeRabbit will review your changes for readability, maintainability, and potential bugs.
+    This project is part of the AI AGENTS ASSEMBLE hackathon.
+
+  summary_template: |
+    ## CodeRabbit Summary
+
+    **Overall impression:** {{ overall_impression }}
+
+    **Key improvements suggested:**
+    {{#each key_suggestions}}
+    - {{this}}
+    {{/each}}
+
+    **Testing notes:**
+    {{ testing_notes }}
+
+    **Docs & readability:**
+    {{ documentation_notes }}
