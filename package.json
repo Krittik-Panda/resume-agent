@@ -1,0 +1,24 @@
+{
+  "name": "ai-resume-portfolio-agent",
+  "version": "1.0.0",
+  "description": "AI Resume & Portfolio Agent for AI Agents Assemble hackathon",
+  "main": "dist/backend/cli-test.js",
+  "scripts": {
+    "test:agent": "tsx backend/cli-test.ts",
+    "generate:summaries": "tsx scripts/generate-summaries.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.0",
+    "node-fetch": "^2.6.7",
+    "together-ai": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/node-fetch": "^2.6.4",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
