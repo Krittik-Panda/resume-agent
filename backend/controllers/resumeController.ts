@@ -6,7 +6,7 @@ export async function analyzeResume(params: GenerateParams): Promise<AnalysisRes
   return {
     summary,
     inputLength: params.text.length,
-    engine: process.env.TOGETHER_API_KEY ? "together-ai" : "local-fallback",
+    engine: process.env.OPENROUTER_API_KEY ? "openrouter" : "local-fallback",
     timestamp: new Date().toISOString(),
   };
 }

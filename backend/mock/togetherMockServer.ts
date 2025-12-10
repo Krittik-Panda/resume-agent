@@ -1,15 +1,17 @@
 import express from "express";
-import bodyParser from "body-parser";
 
 const app = express();
-app.use(bodyParser.json({ limit: "1mb" }));
+app.use(express.json({ limit: "1mb" }));
 
 // Mock OpenRouter API endpoint
 app.post("/api/v1/chat/completions", (req, res) => {
+  console.log("Mock server received request:", JSON.stringify(req.body, null, 2));
   const { messages, model, max_tokens } = req.body || {};
   const userMessage = (messages && messages.find((m: any) => m.role === "user")?.content) || "";
   const snippet = (userMessage && userMessage.toString().slice(0, 250)) || "";
   const summary = `MOCK SUMMARY (${model || "text"}): ${snippet.slice(0, 140)}${snippet.length > 140 ? "…" : ""}`;
+
+  console.log("Mock server responding with:", summary);
 
   // Return JSON in OpenRouter format
   res.json({

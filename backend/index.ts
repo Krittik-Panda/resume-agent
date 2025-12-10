@@ -6,6 +6,10 @@ import llmRouter from "./routes/together";
 
 dotenv.config();
 
+console.log("Environment loaded:");
+console.log("OPENROUTER_API_KEY:", process.env.OPENROUTER_API_KEY ? "SET" : "NOT SET");
+console.log("OPENROUTER_API_URL:", process.env.OPENROUTER_API_URL);
+
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 

@@ -31,35 +31,34 @@ Endpoints
 - `POST /api/resume/analyze` — body: `{ text: string, kind?: string }` returns `{ summary, inputLength, engine, timestamp }`
 - `POST /api/llm/test` — body: `{ input: string, instruction?: string, apiKey?: string, model?: string }` returns `{ result }` (test OpenRouter LLM endpoint)
 
-- If `TOGETHER_API_KEY` and `TOGETHER_API_URL` are set the service will attempt to POST to that URL with `{ input, instruction, kind }`. Otherwise a local heuristic summarizer is used.
 Notes
  - If `OPENROUTER_API_KEY` is set in the environment, the resume summarizer will call OpenRouter LLM. Otherwise, a local heuristic summarizer is used.
  - OpenRouter offers free tier credits (~$5 free) on signup — perfect for testing without cost.
  - The adapter supports custom models; set `OPENROUTER_MODEL` to use different LLMs (e.g., `meta-llama/llama-2-7b-chat`, `openai/gpt-3.5-turbo`).
 
-Together AI adapter test
- - POST `/api/together/test` — body: `{ input: string, instruction?: string, kind?: string }` returns `{ result: string }`. Use this to verify your LLM endpoint and key.
+OpenRouter LLM test
+ - POST `/api/llm/test` — body: `{ input: string, instruction?: string, kind?: string }` returns `{ result: string }`. Use this to verify your OpenRouter endpoint and key.
 
 Example:
 ```
-curl -X POST http://localhost:3000/api/together/test \
+curl -X POST http://localhost:3000/api/llm/test \
 	-H "Content-Type: application/json" \
 	-d '{"input":"Hello world. This is a test.", "instruction":"Summarize in one sentence."}'
 ```
 
 Local mock server
- - You can run a local mock Together AI server for testing: `npm run mock:llm` (starts at `http://localhost:4000/generate`).
- - Then either set `TOGETHER_API_URL=http://localhost:4000/generate` and `TOGETHER_API_KEY=mock` and restart the backend, or call the test route with `apiUrl`/`apiKey` in the request body (useful when you don't want to restart the backend):
+ - You can run a local mock OpenRouter server for testing: `npm run mock:llm` (starts at `http://localhost:4000/api/v1/chat/completions`).
+ - Then either set `OPENROUTER_API_URL=http://localhost:4000/api/v1/chat/completions` and `OPENROUTER_API_KEY=mock` and restart the backend, or call the test route with `apiUrl`/`apiKey` in the request body (useful when you don't want to restart the backend):
 
 Example using per-request `apiUrl`/`apiKey` (no backend restart required):
 ```
-curl -X POST http://localhost:3000/api/together/test \
+curl -X POST http://localhost:3000/api/llm/test \
 	-H "Content-Type: application/json" \
-	-d '{"input":"Hello world.", "instruction":"Summarize.", "apiUrl":"http://localhost:4000/generate", "apiKey":"mock"}'
+	-d '{"input":"Hello world.", "instruction":"Summarize.", "apiUrl":"http://localhost:4000/api/v1/chat/completions", "apiKey":"mock"}'
 ```
 
 Hackathon tool integrations
-- `Together AI`: used as the primary LLM. Configure `TOGETHER_API_URL` and `TOGETHER_API_KEY`.
+- `OpenRouter`: used as the primary LLM. Configure `OPENROUTER_API_URL` and `OPENROUTER_API_KEY`.
 - `CodeRabbit`: optional PR review integration — set `CODE_RABBIT_API_URL` and `CODE_RABBIT_API_KEY` to enable programmatic reviews.
 - `Oumi`: optional ranking/evaluation endpoint — set `OUMI_API_URL`/`OUMI_API_KEY` to enable.
 - `Cline`: optional autonomous coding workflow runner — set `CLINE_API_URL`/`CLINE_API_KEY` to enable remote task triggers.

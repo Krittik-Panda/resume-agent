@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { callOpenRouterLLM } from "../adapters/togetherAdapter";
+import { callOpenRouterLLM } from "../adapters/openrouterAdapter";
 
 const router = Router();
 

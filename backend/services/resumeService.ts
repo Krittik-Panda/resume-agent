@@ -1,4 +1,4 @@
-import { callOpenRouterLLM } from "../adapters/togetherAdapter";
+import { callOpenRouterLLM } from "../adapters/openrouterAdapter";
 
 /**
  * Generate a summary using OpenRouter LLM when configured,

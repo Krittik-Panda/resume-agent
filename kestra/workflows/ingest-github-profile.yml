@@ -21,7 +21,11 @@ tasks:
       uri: "{{ inputs.backend_url }}/api/resume/analyze"
       headers:
         Content-Type: application/json
-      body: "{{ outputs.fetch-profile.body }}\n{{ outputs.fetch-repos.body }}"
+      body: |
+        {
+          "text": "GitHub Profile: {{ outputs.fetch-profile.body }}\n\nRepositories: {{ outputs.fetch-repos.body | jq -r '.[] | \"- \(.name): \(.description // \"\") (\(.language // \"Unknown\"), \(.stargazers_count // 0) stars, \(.forks_count // 0) forks)\"' | join('\n') }}",
+          "kind": "github-profile"
+        }
 
 inputs:
   - id: github_user
