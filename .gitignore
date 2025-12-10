@@ -1,3 +1,27 @@
 node_modules/
-.env
 dist/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated data
+data/*
+!data/.gitkeep
+
+# Vercel local config
+.vercel/
