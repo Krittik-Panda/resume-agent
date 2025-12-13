@@ -8,7 +8,6 @@ set -e  # Exit on any error
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
@@ -121,12 +120,12 @@ echo ""
 echo -e "${CYAN}1. Testing Health Check Endpoint${NC}"
 response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$BACKEND_URL/health")
 http_status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
-body=$(echo "$response" | sed '/HTTP_STATUS:/d')
+body=$(echo "$response" | grep -v "HTTP_STATUS:")
 
-if [ "$http_status" = "200" ] && echo "$body" | grep -q '"status":"ok"'; then
+if [ "$http_status" = "200" ] && echo "$body" | grep -q "\"status\":\"ok\""; then
     print_test "Health check" "PASS"
 else
-    print_test "Health check" "FAIL" "Expected status 200 with 'ok', got: $http_status, body: $body"
+    print_test "Health check" "FAIL" "Expected status 200 with \"ok\", got: $http_status, body: $body"
 fi
 
 echo ""
@@ -140,12 +139,12 @@ response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$BACKEND_URL/api/res
   -d "{\"text\":\"$test_resume_text\"}")
 
 http_status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
-body=$(echo "$response" | sed '/HTTP_STATUS:/d')
+body=$(echo "$response" | grep -v "HTTP_STATUS:")
 
-if [ "$http_status" = "200" ] && echo "$body" | jq -e '.summary and .inputLength and .engine and .timestamp' >/dev/null 2>&1; then
-    input_length=$(echo "$body" | jq -r '.inputLength')
-    engine=$(echo "$body" | jq -r '.engine')
-    summary_length=$(echo "$body" | jq -r '.summary | length')
+if [ "$http_status" = "200" ] && echo "$body" | jq -e ".summary and .inputLength and .engine and .timestamp" >/dev/null 2>&1; then
+    input_length=$(echo "$body" | jq -r ".inputLength")
+    engine=$(echo "$body" | jq -r ".engine")
+    summary_length=$(echo "$body" | jq -r ".summary | length")
     print_test "Resume analyzer basic" "PASS" "Input length: $input_length, Engine: $engine, Summary length: $summary_length"
 else
     print_test "Resume analyzer basic" "FAIL" "Expected valid JSON response, got: $http_status, body: $body"
@@ -160,13 +159,13 @@ roles=("backend-engineer" "security-engineer" "open-source-contributor")
 for role in "${roles[@]}"; do
     response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$BACKEND_URL/api/resume/analyze" \
       -H "Content-Type: application/json" \
-      -d "{\"text\":\"$test_resume_text\",\"kind\":\"$role\"}")
+      -d "{\"text\":\"$test_resume_text\"}")
 
     http_status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
-    body=$(echo "$response" | sed '/HTTP_STATUS:/d')
+    body=$(echo "$response" | grep -v "HTTP_STATUS:")
 
-    if [ "$http_status" = "200" ] && echo "$body" | jq -e '.summary' >/dev/null 2>&1; then
-        summary=$(echo "$body" | jq -r '.summary')
+    if [ "$http_status" = "200" ] && echo "$body" | jq -e ".summary" >/dev/null 2>&1; then
+        summary=$(echo "$body" | jq -r ".summary")
         print_test "Resume analyzer - $role" "PASS" "Summary: ${summary:0:50}..."
     else
         print_test "Resume analyzer - $role" "FAIL" "Expected valid response for $role"
@@ -179,13 +178,14 @@ echo ""
 echo -e "${CYAN}4. Testing LLM Test Endpoint${NC}"
 response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$BACKEND_URL/api/llm/test" \
   -H "Content-Type: application/json" \
-  -d '{"input":"Machine learning is transforming industries worldwide.","instruction":"Summarize in one sentence"}')
+  -d "{\"input\":\"Machine learning is transforming industries worldwide.\",\"instruction\":\"Summarize in one sentence\"}"
+)
 
 http_status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
-body=$(echo "$response" | sed '/HTTP_STATUS:/d')
+body=$(echo "$response" | grep -v "HTTP_STATUS:")
 
-if [ "$http_status" = "200" ] && echo "$body" | jq -e '.result' >/dev/null 2>&1; then
-    result=$(echo "$body" | jq -r '.result')
+if [ "$http_status" = "200" ] && echo "$body" | jq -e ".result" >/dev/null 2>&1; then
+    result=$(echo "$body" | jq -r ".result")
     print_test "LLM test endpoint" "PASS" "Result: ${result:0:50}..."
 else
     print_test "LLM test endpoint" "FAIL" "Expected result field, got: $http_status, body: $body"
@@ -212,10 +212,11 @@ fi
 # Test missing text field
 response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$BACKEND_URL/api/resume/analyze" \
   -H "Content-Type: application/json" \
-  -d '{"kind":"backend-engineer"}')
+  -d "{\"kind\":\"backend-engineer\"}"
+)
 
 http_status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
-body=$(echo "$response" | sed '/HTTP_STATUS:/d')
+body=$(echo "$response" | grep -v "HTTP_STATUS:")
 
 if [ "$http_status" = "400" ] && echo "$body" | grep -q "text"; then
     print_test "Error handling - missing text" "PASS" "Correctly caught missing text field"
@@ -232,20 +233,21 @@ if start_mock; then
     # Test LLM with mock server
     response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$BACKEND_URL/api/llm/test" \
       -H "Content-Type: application/json" \
-      -d '{"input":"Test input","apiUrl":"'"$MOCK_URL"'/api/v1/chat/completions","apiKey":"mock"}')
+      -d "{\"input\":\"Test input\",\"apiUrl\":\""$MOCK_URL"/api/v1/chat/completions\",\"apiKey\":\"mock\"}"
+)
 
     http_status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
-    body=$(echo "$response" | sed '/HTTP_STATUS:/d')
+    body=$(echo "$response" | grep -v "HTTP_STATUS:")
 
-    if [ "$http_status" = "200" ] && echo "$body" | jq -e '.result' >/dev/null 2>&1; then
-        result=$(echo "$body" | jq -r '.result')
+    if [ "$http_status" = "200" ] && echo "$body" | jq -e ".result" >/dev/null 2>&1; then
+        result=$(echo "$body" | jq -r ".result")
         if echo "$result" | grep -q "MOCK SUMMARY"; then
             print_test "Mock server integration" "PASS" "Received mock response: ${result:0:30}..."
         else
-            print_test "Mock server integration" "FAIL" "Expected mock response, got: $result"
+            print_test "Mock server integration" "FAIL" "Expected mock response, got: $result, Full Body: $body"
         fi
     else
-        print_test "Mock server integration" "FAIL" "Expected successful response, got: $http_status"
+        print_test "Mock server integration" "FAIL" "Expected successful response, got: $http_status, Full Body: $body"
     fi
 
     # Kill mock server
@@ -261,11 +263,13 @@ echo ""
 echo -e "${CYAN}7. Testing Engine Detection${NC}"
 
 # Test without API key (should use local-fallback)
-response=$(curl -s -X POST "$BACKEND_URL/api/resume/analyze" \
+OPENROUTER_API_KEY="" response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$BACKEND_URL/api/resume/analyze" \
   -H "Content-Type: application/json" \
   -d "{\"text\":\"$test_resume_text\"}")
 
-engine=$(echo "$response" | jq -r '.engine')
+http_status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
+body=$(echo "$response" | grep -v "HTTP_STATUS:")
+engine=$(echo "$body" | jq -r ".engine")
 
 if [ "$engine" = "local-fallback" ]; then
     print_test "Engine detection - no API key" "PASS" "Correctly detected local-fallback engine"
