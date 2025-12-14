@@ -64,6 +64,11 @@ export async function analyzeResumePDF(pdfBuffer: Buffer, kind?: string): Promis
   // Extract text from PDF
   const pdfResult = await extractTextFromPDF(pdfBuffer);
 
+  // Validate extracted text has meaningful content
+  if (!pdfResult.text || pdfResult.text.trim().length < 50) {
+    throw new Error("PDF extraction failed or resume appears to be empty/corrupted. Please ensure the PDF contains readable text content.");
+  }
+
   // Save extracted text to data file for chat functionality
   const resumeDataPath = path.join(process.cwd(), "data/raw/resume-content.json");
   const resumeData = {
