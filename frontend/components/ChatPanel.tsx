@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 
 type ChatPanelProps = {
   onHighlightProject?: (projectId: string) => void;
@@ -172,7 +173,15 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
                     : 'bg-muted'
                 }`}
               >
-                {msg.content}
+                {msg.role === 'agent' ? (
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <ReactMarkdown>
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  msg.content
+                )}
               </div>
             </motion.div>
           ))}

@@ -23,29 +23,49 @@ export class AgentService {
     );
 
     if (!fs.existsSync(resumePath)) {
+      console.error("Resume file not found at:", resumePath);
       throw new Error("Resume not found. Please upload a resume PDF first.");
     }
 
-    const raw = JSON.parse(fs.readFileSync(resumePath, "utf-8"));
-    const resumeText = raw.extracted_text;
+    let raw: any;
+    let resumeText: string;
+
+    try {
+      raw = JSON.parse(fs.readFileSync(resumePath, "utf-8"));
+      resumeText = raw.extracted_text;
+    } catch (error) {
+      console.error("Error reading resume file:", error);
+      throw new Error("Resume data is corrupted. Please re-upload your resume PDF.");
+    }
+
+    // Validate resume text
+    if (!resumeText || typeof resumeText !== 'string' || resumeText.trim().length < 10) {
+      console.error("Invalid resume text:", resumeText);
+      throw new Error("Resume content appears to be empty or invalid. Please re-upload your resume PDF.");
+    }
+
+    console.log(`Processing chat request with resume text length: ${resumeText.length}`);
 
     const systemPrompt = `
-You are an AI resume analyst.
+You are an AI resume analyst. You MUST answer questions using ONLY the information contained in the resume provided below. Do NOT use any external knowledge, assumptions, or information not explicitly stated or clearly implied in the resume content.
 
 RESUME CONTENT:
 ${resumeText}
 
-INSTRUCTIONS:
-- Answer using ONLY the resume content above
-- You may infer obvious information (name, skills, experience) from the content
-- Do NOT invent information not reasonably implied from the resume
-- If information is truly missing, say so clearly
-- Format responses clearly and professionally:
-  * Use bullet points for lists (skills, experience, etc.)
-  * Structure answers with clear sections when appropriate
-  * Keep responses concise but complete
-  * Use proper grammar and professional language
- `.trim();
+STRICT INSTRUCTIONS:
+- ONLY use information from the resume above - ignore any prior knowledge
+- If asked about something not mentioned in the resume, explicitly state "This information is not available in the resume"
+- Do NOT invent, assume, or extrapolate information not in the resume
+- For skills, experience, or other lists: extract them directly from the resume text
+- Format responses professionally using markdown:
+  * Use bullet points (-) for lists
+  * Use **bold** for emphasis
+  * Use headings (# ##) for sections when appropriate
+  * Keep responses clear, concise, and directly based on resume content
+- If the resume doesn't contain relevant information, say so rather than making up details
+
+Remember: Your responses must be 100% grounded in the resume content provided. Do not add external context or knowledge.
+`.trim();
 
   const response = await callOpenRouterLLM(
       message,
@@ -53,6 +73,6 @@ INSTRUCTIONS:
       "resume-chat",
       {}
     );
-    return response ?? "No response generated from resume.";
+    return response ?? "This information is not available in the resume.";
   }
 }
