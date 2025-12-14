@@ -2,7 +2,27 @@
 
 An interactive, AI-powered resume and portfolio agent that transforms static CVs into dynamic, conversational experiences. Built for the **AI AGENTS ASSEMBLE** hackathon by WeMakeDevs, this project showcases a comprehensive **portfolio + multi-agent system** with integrated chat interface.
 
-**🚀 Live Demo**: [Portfolio Website](https://your-portfolio.vercel.app)
+**🚀 Live Demo**: [Portfolio Website](https://resume-agent-llm.vercel.app/)
+
+### 🏠 Home Page
+
+![Home Page](images/home_page.png)
+
+### 💬 Chat with AI
+
+![Chat with LLM](images/chat_with_LLM.png)
+
+### 🛠️ Technical Skills View
+
+![Technical Skills](images/technical_skills.png)
+
+### 📂 Projects Section
+
+![Projects](images/projects.png)
+
+<br>
+<br>
+
 
 **⚡ Key Innovation**: Interactive AI agents that understand your profile and provide personalized insights for different career paths.
 
