@@ -29,7 +29,7 @@ An interactive, AI-powered resume and portfolio agent that transforms static CVs
 This project integrates all key sponsor tools:
 
 - **OpenRouter** – LLM inference for intelligent analysis
-- **Kestra** – automated GitHub profile ingestion and data workflows
+- **Kestra** – workflow orchestration and automation
 - **Vercel** – seamless deployment and hosting
 - **Oumi** – AI model ranking and response evaluation
 - **CodeRabbit** – automated code reviews and quality assurance
@@ -41,7 +41,7 @@ This project integrates all key sponsor tools:
 
 ### Problem
 
-Traditional static resumes and GitHub profiles fail to tell the complete story. Recruiters, mentors, and peers must navigate multiple platforms to understand:
+Traditional static resumes fail to tell the complete story. Recruiters, mentors, and peers must navigate multiple platforms to understand:
 
 - **Project Impact**: What you've actually built and its technical significance
 - **Skill Depth**: Your capabilities in systems, networking, and security domains
@@ -71,14 +71,14 @@ This project is a **comprehensive AI-powered resume ecosystem** that:
 
 ### 2. Multi-Agent Profile Analysis
 
-- **Profile Analyzer Agent**: Extracts and structures information from GitHub and resume data
+- **Profile Analyzer Agent**: Extracts and structures information from resume data
 - **Role Matcher Agent**: Tailors summaries for specific career paths (backend, security, frontend, etc.)
 - **Content Generator Agent**: Creates compelling narratives and project explanations
 - **Learning Tracker Agent**: Monitors growth patterns and skill development over time
 
 ### 3. Automated Data Intelligence
 
-- **GitHub Integration**: Automatically ingests repository data, commit history, and project metrics
+
 - **Dynamic Summaries**: AI-generated role-specific summaries using OpenRouter LLM
 - **Continuous Updates**: Kestra workflows maintain data freshness
 - **PDF Processing**: Extract and analyze resume content from PDF documents
@@ -98,30 +98,31 @@ This project is a **comprehensive AI-powered resume ecosystem** that:
 
 **Frontend Layer:**
 
-- **Next.js 14+** with App Router for modern React development
+- **Next.js 16.0.8** with App Router for modern React development
+- **React 19.2.1** for component-based UI
 - **TypeScript** for type-safe development
-- **Tailwind CSS** for responsive, utility-first styling
-- **Shadcn/ui** for consistent, accessible UI components
+- **Tailwind CSS v4** for responsive, utility-first styling
+- **Radix UI + Tailwind** for consistent, accessible UI components
+- **Framer Motion** for smooth animations
+- **React Markdown** for rich text rendering
+- **Lucide React** for modern iconography
 
 **Backend Layer:**
 
 - **Node.js/Express** RESTful API server
 - **OpenRouter Integration** for LLM-powered analysis
 - **PDF Processing** with pdf-parse for document extraction
-- **GitHub API Integration** for profile data ingestion
 
-**Agent System (Future Implementation):**
+**Agent System (Current Implementation):**
 
-- **Multi-Agent Architecture** with specialized roles
-- **Agent Communication Protocols** for coordinated analysis
-- **Learning & Adaptation** capabilities from user interactions
-- **Model Ranking** with Oumi for response quality optimization
+- **Agent Service**: Chat functionality with profile analysis
+- **Model Ranking**: Oumi-based evaluation of LLM responses
+- **Resume Processing**: PDF and text analysis with AI summaries
 
 **Data & Workflows:**
 
 - **Kestra Workflows** for automated data processing
 - **Structured Data Storage** in JSON format
-- **GitHub Webhooks** for real-time updates
 - **Vercel Edge Functions** for serverless deployment
 
 **External Integrations:**
@@ -129,7 +130,6 @@ This project is a **comprehensive AI-powered resume ecosystem** that:
 - **OpenRouter** LLM inference engine
 - **Vercel** deployment and hosting platform
 - **CodeRabbit** automated code review
-- **GitHub** version control and profile data
 
 ### System Architecture Diagram
 
@@ -147,9 +147,9 @@ This project is a **comprehensive AI-powered resume ecosystem** that:
                                 ▼ HTTP/WebSocket
 ┌─────────────────────────────────────────────────────────────────┐
 │                        FRONTEND LAYER                           │
-│                    Next.js 14+ Application                       │
+│                    Next.js 16.0.8 Application                    │
 │  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  API Routes  │  Components  │  Hooks  │  Utils  │  Types    │ │
+│  │  Components  │  Pages  │  Utils  │  Types  │  Styles        │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
                                 │
@@ -158,15 +158,15 @@ This project is a **comprehensive AI-powered resume ecosystem** that:
 │                        BACKEND LAYER                            │
 │                    Node.js/Express Server                       │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
-│  │   Resume    │  │   PDF       │  │   GitHub    │  │  LLM    │ │
-│  │ Controller  │  │ Processor   │  │  Service    │  │ Service │ │
+│  │   Resume    │  │   PDF       │  │   Model     │  │  Agent  │ │
+│  │ Controller  │  │ Processor   │  │  Ranking   │  │ Service │ │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼ External APIs
 ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│ OpenRouter  │  │ GitHub API  │  │   Vercel    │  │   Kestra    │
-│   LLM API   │  │    Data     │  │ Deployment  │  │  Workflows  │
+│ OpenRouter  │  │   Vercel    │  │   Kestra    │  │   Oumi      │
+│   LLM API   │  │ Deployment  │  │  Workflows  │  │  Ranking    │
 └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
                                 │
                                 ▼ Data Storage
@@ -179,13 +179,13 @@ This project is a **comprehensive AI-powered resume ecosystem** that:
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
 └─────────────────────────────────────────────────────────────────┘
                                 │
-                                ▼ Future Implementation
+                                ▼ Agent System
 ┌─────────────────────────────────────────────────────────────────┐
 │                        AGENT SYSTEM                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
-│  │   Profile   │  │   Role      │  │   Content   │  │ Learning│ │
-│  │  Analyzer   │  │   Matcher   │  │  Generator  │  │ Tracker │ │
-│  │    Agent    │  │    Agent    │  │    Agent    │  │  Agent  │ │
+│  │   Agent     │  │   Model     │  │   Resume    │  │ Profile │ │
+│  │   Service   │  │   Ranking   │  │   Analysis  │  │  Chat   │ │
+│  │             │  │   (Oumi)    │  │             │  │         │ │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -212,7 +212,7 @@ resume-agent/
 │   │   ├── ProjectCard.tsx           # Project display component
 │   │   ├── RoleSelector.tsx          # Role filter component
 │   │   ├── SkillsSelector.tsx        # Skills filter component
-│   │   └── ui/                       # Shadcn/ui components
+│   │   └── ui/                       # UI components
 │   │       └── button.tsx            # Button component
 │   ├── lib/                          # Utility libraries
 │   │   └── utils.ts                  # Utility functions
@@ -226,7 +226,7 @@ resume-agent/
 │   ├── next.config.ts                # Next.js configuration
 │   ├── tsconfig.json                 # TypeScript configuration
 │   ├── tailwind.config.js            # Tailwind CSS configuration
-│   ├── postcss.config.js             # PostCSS configuration
+│   ├── postcss.config.mjs            # PostCSS configuration
 │   ├── eslint.config.mjs             # ESLint configuration
 │   └── README.md                     # Frontend documentation
 │
@@ -238,95 +238,47 @@ resume-agent/
 │   ├── mock/                         # Development mocks
 │   │   └── togetherMockServer.ts     # Mock LLM server
 │   ├── routes/                       # API route definitions
+│   │   ├── agent.ts                  # Agent chat routes
+│   │   ├── models.ts                 # Model ranking routes
 │   │   ├── resume.ts                 # Resume analysis routes
 │   │   └── together.ts               # LLM testing routes
 │   ├── services/                     # Business logic services
+│   │   ├── agentService.ts           # Agent chat service
 │   │   ├── integrations.ts           # External integrations
+│   │   ├── modelRanker.ts            # Oumi model ranking
 │   │   ├── pdfService.ts             # PDF processing service
 │   │   └── resumeService.ts          # Resume analysis service
 │   ├── types.ts                      # TypeScript type definitions
 │   ├── index.ts                      # Main server entry point
 │   ├── cli-test.ts                   # CLI testing utility
-│   ├── package.json                  # Backend dependencies
 │   ├── .env.example                  # Environment template
 │   └── README.md                     # Backend documentation
 │
-├── agents/                           # AI Agent System (Future)
-│   ├── analyzer/                     # Profile analysis agents
-│   │   ├── profile-analyzer.ts       # Profile data extractor
-│   │   ├── skill-assessment.ts       # Skill evaluation agent
-│   │   └── impact-analyzer.ts        # Project impact analyzer
-│   ├── matcher/                      # Role matching agents
-│   │   ├── role-matcher.ts           # Career role matcher
-│   │   ├── job-fit-analyzer.ts       # Job compatibility analyzer
-│   │   └── industry-specific.ts      # Industry-specific matcher
-│   ├── generator/                    # Content generation agents
-│   │   ├── summary-generator.ts      # AI summary creator
-│   │   ├── narrative-generator.ts    # Project narrative creator
-│   │   └── insight-generator.ts      # Insight generation agent
-│   ├── tracker/                      # Learning & growth tracking
-│   │   ├── growth-tracker.ts         # Progress monitoring
-│   │   ├── learning-analyzer.ts      # Learning pattern analysis
-│   │   └── trajectory-predictor.ts   # Career trajectory predictor
-│   ├── config/                       # Agent configurations
-│   │   ├── agent-config.json         # Global agent settings
-│   │   ├── model-configs.json        # LLM model configurations
-│   │   └── prompt-templates/         # System prompt templates
-│   │       ├── analyzer-prompts.md   # Analysis prompt templates
-│   │       ├── matcher-prompts.md    # Matching prompt templates
-│   │       ├── generator-prompts.md  # Generation prompt templates
-│   │       └── tracker-prompts.md    # Tracking prompt templates
-│   ├── communication/                # Inter-agent protocols
-│   │   ├── message-protocols.ts      # Agent communication protocol
-│   │   ├── data-exchange.ts          # Data sharing mechanisms
-│   │   └── coordination.ts           # Agent coordination logic
-│   └── learning/                     # Agent learning & adaptation
-│       ├── feedback-loop.ts          # User feedback processing
-│       ├── performance-metrics.ts    # Agent performance tracking
-│       └── adaptation-strategies.ts  # Learning adaptation logic
+├── agents/                           # AI Agent System
+│   ├── index.ts                      # Agent exports
+│   ├── resume-agent.ts               # Resume agent implementation
+│   └── types.ts                      # Agent type definitions
 │
-├── data/                             # Structured Data Storage
-│   ├── profile/                      # Profile information
-│   │   ├── basic-info.json           # Basic profile data
-│   │   ├── skills.json               # Technical skills database
-│   │   ├── experience.json           # Work experience data
-│   │   └── education.json            # Educational background
-│   ├── projects/                     # Project information
-│   │   ├── github-repos.json         # GitHub repository data
-│   │   ├── personal-projects.json    # Personal project details
-│   │   ├── contributions.json        # Open source contributions
-│   │   └── project-metadata.json     # Project categorization & tags
-│   ├── generated/                    # AI-generated content
-│   │   ├── role-summaries/           # Role-specific summaries
-│   │   │   ├── backend-engineer.json # Backend role summary
-│   │   │   ├── frontend-engineer.json# Frontend role summary
-│   │   │   ├── security-engineer.json# Security role summary
-│   │   │   ├── devops-engineer.json  # DevOps role summary
-│   │   │   └── open-source-contributor.json # OSS contributor summary
-│   │   ├── project-analyses/         # AI project analyses
-│   │   │   ├── [project-id]-analysis.json # Individual project analysis
-│   │   │   └── architecture-insights.json # Technical architecture insights
-│   │   ├── learning-insights.json    # Growth and learning analysis
-│   │   └── career-trajectory.json    # Career development insights
-│   └── raw/                          # Raw ingested data
-│       ├── github-profile.json       # Raw GitHub profile data
-│       ├── github-repos-raw.json     # Raw repository information
-│       └── resume-content.json       # Extracted resume content
+├── data/                             # Data Storage
+│   └── .gitkeep                      # Placeholder for data files
 │
 ├── kestra/                           # Workflow Orchestration
 │   └── workflows/                    # Kestra workflow definitions
-│       ├── ingest-github-profile.yml # GitHub data ingestion workflow
-│       ├── generate-summaries.yml    # AI summary generation workflow
-│       ├── update-skills.yml         # Skills update workflow
-│       ├── track-learning.yml        # Learning progress tracking
-│       └── scheduled-updates.yml     # Automated update workflows
+│       └── workflow.yml              # Data processing workflow
 │
 ├── scripts/                          # Utility Scripts
 │   ├── generate-summaries.ts         # Multi-role summary generator
-│   ├── ingest-profile.ts             # Profile data ingestion script
-│   ├── github-scraper.ts             # GitHub data scraper utility
-│   ├── pdf-processor.ts              # PDF document processor
-│   └── data-validator.ts             # Data validation utilities
+│   ├── README.md                     # Scripts documentation
+│   └── test-agent.ts                 # Agent testing script
+│
+├── tests/                            # Test Scripts
+│   ├── simple-test.sh                # Simple functionality test
+│   ├── test-backend.sh               # Backend API tests
+│   └── test-integration.sh           # Integration tests
+│
+├── logs/                             # Application Logs
+│   ├── backend.log                   # Backend server logs
+│   └── mock.log                      # Mock server logs
 │
 ├── .coderabbit.yml                   # CodeRabbit configuration
 ├── .gitignore                        # Git ignore rules
@@ -334,91 +286,14 @@ resume-agent/
 ├── package-lock.json                 # Dependency lock file
 ├── tsconfig.json                     # TypeScript root configuration
 ├── vercel.json                       # Vercel deployment configuration
+├── test-resume-upload.js             # Resume upload test script
+├── test_payload.json                 # Test payload data
 └── README.md                         # This documentation file
 ```
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **Node.js 18+** and npm
-- **OpenRouter API Key** (free tier available)
-- **GitHub Personal Access Token** (optional, for higher API limits)
-- **Vercel Account** (for deployment)
-
-### Installation & Setup
-
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd resume-agent
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   # Install root dependencies
-   npm install
-   
-   # Install frontend dependencies
-   cd frontend && npm install && cd ..
-   
-   # Install backend dependencies
-   cd backend && npm install && cd ..
-   ```
-
-3. **Environment Configuration**
-
-   **Backend Environment (.env in backend/):**
-
-   ```env
-   PORT=3000
-   OPENROUTER_API_KEY=your_openrouter_api_key
-   OPENROUTER_API_URL=https://openrouter.ai/api/v1/chat/completions
-   OPENROUTER_MODEL=mistralai/mistral-7b-instruct
-   GITHUB_TOKEN=your_github_personal_access_token
-   ```
-
-   **Root Environment (.env in project root):**
-
-   ```env
-   GITHUB_USER=your_github_username
-   BACKEND_URL=http://localhost:3000
-   ```
-
-4. **Start Development Servers**
-
-   ```bash
-   # Start backend (Terminal 1)
-   cd backend && npm run dev
-   
-   # Start frontend (Terminal 2)
-   cd frontend && npm run dev
-   ```
-
-5. **Access the Application**
-   - Frontend: <http://localhost:3000>
-   - Backend API: <http://localhost:3000>
-   - Backend Health: <http://localhost:3000/health>
-
-### Data Generation
-
-Generate AI-powered role summaries:
-
-```bash
-# Generate summaries for default roles
-npm run generate:summaries
-
-# Generate summaries for custom roles
-ROLES="frontend-engineer,data-scientist" npm run generate:summaries
-```
-
----
-
-## 📊 API Documentation
+##  API Documentation
 
 ### Base URL
 
@@ -473,6 +348,74 @@ Analyzes resume text or PDF documents and generates AI-powered summaries tailore
 - `200` - Success
 - `400` - Invalid request (missing text/file, invalid PDF)
 - `500` - Server error
+
+#### POST /api/agent/chat
+
+Interactive chat with AI agents for profile analysis and career insights.
+
+**Request:**
+
+```json
+{
+  "message": "What programming languages does this candidate know?"
+}
+```
+
+**Response:**
+
+```json
+{
+  "response": "Based on the resume analysis, the candidate demonstrates proficiency in JavaScript, TypeScript, Python, and Java..."
+}
+```
+
+#### GET /api/agent/status
+
+Get agent system status and available role types.
+
+**Response:**
+
+```json
+{
+  "ready": true,
+  "availableRoles": ["backend-engineer", "frontend-engineer", "fullstack-developer"],
+  "message": "Agent is ready to chat"
+}
+```
+
+#### GET /api/models/rank
+
+Get current model performance rankings.
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "rankings": [
+    {
+      "modelName": "mistralai/mistral-7b-instruct",
+      "score": 0.85,
+      "evaluations": 15
+    }
+  ],
+  "bestModel": "mistralai/mistral-7b-instruct"
+}
+```
+
+#### POST /api/models/evaluate
+
+Evaluate a specific model's response quality.
+
+**Request:**
+
+```json
+{
+  "text": "Sample resume text...",
+  "model": "mistralai/mistral-7b-instruct",
+  "kind": "backend-engineer"
+}
+```
 
 #### POST /api/llm/test
 
@@ -549,8 +492,6 @@ Common error scenarios:
    OPENROUTER_API_KEY=your_openrouter_api_key
    OPENROUTER_API_URL=https://openrouter.ai/api/v1/chat/completions
    OPENROUTER_MODEL=mistralai/mistral-7b-instruct
-   GITHUB_TOKEN=your_github_personal_access_token
-   GITHUB_USER=your_github_username
    ```
 
 3. **Frontend Deployment**
@@ -574,12 +515,12 @@ Common error scenarios:
 
 2. **Configure Workflows**
    - Import workflow files from `kestra/workflows/`
-   - Set up GitHub webhooks for automated triggers
-   - Configure data storage connections
+   - Configure automated triggers for data processing
+   - Set up data storage connections
 
 3. **Schedule Automated Updates**
-   - Set up daily profile data ingestion
-   - Configure summary regeneration triggers
+   - Configure automated data processing workflows
+   - Set up summary regeneration triggers
    - Monitor workflow execution logs
 
 ### Production Checklist
@@ -595,33 +536,33 @@ Common error scenarios:
 
 ## 🗺️ Future Roadmap
 
-### Phase 1: Core Agent System (Q1 2024)
+### Phase 1: Enhanced Agent System (Q1 2025)
 
-- [ ] Implement Profile Analyzer Agent
-- [ ] Add Role Matcher Agent with basic role templates
-- [ ] Create Content Generator Agent for summaries
-- [ ] Set up inter-agent communication protocols
+- [x] Basic agent chat functionality
+- [x] Model ranking with Oumi
+- [ ] Expand agent capabilities with more specialized roles
+- [ ] Implement inter-agent communication protocols
 
-### Phase 2: Advanced Intelligence (Q2 2024)
+### Phase 2: Advanced Intelligence (Q2 2025)
 
 - [ ] Learning Tracker Agent for growth analysis
-- [ ] Oumi integration for model ranking and optimization
 - [ ] Advanced conversation memory and context
 - [ ] Multi-language support for global users
+- [ ] Custom agent training capabilities
 
-### Phase 3: Ecosystem Integration (Q3 2024)
+### Phase 3: Ecosystem Integration (Q3 2025)
 
 - [ ] CodeRabbit integration for automated code reviews
 - [ ] Cline integration for autonomous development
 - [ ] Advanced Kestra workflows for complex data pipelines
 - [ ] Real-time collaboration features
 
-### Phase 4: Enterprise Features (Q4 2024)
+### Phase 4: Enterprise Features (Q4 2025)
 
 - [ ] Team portfolio management
 - [ ] Advanced analytics dashboard
-- [ ] Custom agent training capabilities
 - [ ] API marketplace for third-party integrations
+- [ ] Enterprise security and compliance
 
 ### Long-term Vision
 
@@ -635,27 +576,6 @@ Common error scenarios:
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `npm test`
-5. Submit a pull request
-
-### Code Standards
-
-- TypeScript for type safety
-- ESLint for code quality
-- Prettier for consistent formatting
-- Comprehensive test coverage
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
