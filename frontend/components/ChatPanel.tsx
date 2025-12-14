@@ -4,6 +4,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+type ChatPanelProps = {
+  onHighlightProject?: (projectId: string) => void;
+};
+
 interface Message {
   id: string;
   role: 'user' | 'agent';
@@ -11,13 +15,13 @@ interface Message {
   timestamp: Date;
 }
 
-export const ChatPanel = () => {
+export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
       role: 'agent',
       content:
-        "Hi! Upload a resume PDF first, then ask me anything about the candidate.",
+        'Hi! Upload a resume PDF first, then ask me anything about the candidate.',
       timestamp: new Date(),
     },
   ]);
@@ -28,15 +32,17 @@ export const ChatPanel = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // ---------------------------------
-  // CHAT → BACKEND AGENT
-  // ---------------------------------
+  // ------------------------------
+  // SEND CHAT MESSAGE
+  // ------------------------------
   const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
+    if (!input.trim() || isTyping || !BACKEND_URL) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -50,12 +56,10 @@ export const ChatPanel = () => {
     setIsTyping(true);
 
     try {
-      const res = await fetch('http://localhost:3000/api/agent/chat', {
+      const res = await fetch(`${BACKEND_URL}/api/agent/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage.content,
-        }),
+        body: JSON.stringify({ message: userMessage.content }),
       });
 
       const data = await res.json();
@@ -69,6 +73,11 @@ export const ChatPanel = () => {
           timestamp: new Date(),
         },
       ]);
+
+      // Optional project highlight hook (safe)
+      if (data.projectId) {
+        onHighlightProject?.(data.projectId);
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -84,10 +93,12 @@ export const ChatPanel = () => {
     }
   };
 
-  // ---------------------------------
+  // ------------------------------
   // PDF RESUME UPLOAD
-  // ---------------------------------
+  // ------------------------------
   const handlePDFUpload = async (file: File) => {
+    if (!BACKEND_URL) return;
+
     if (file.type !== 'application/pdf') {
       alert('Only PDF resumes are supported.');
       return;
@@ -109,7 +120,7 @@ export const ChatPanel = () => {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://localhost:3000/api/resume/analyze', {
+      const res = await fetch(`${BACKEND_URL}/api/resume/analyze`, {
         method: 'POST',
         body: formData,
       });

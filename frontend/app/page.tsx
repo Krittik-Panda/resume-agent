@@ -241,7 +241,7 @@ const App = () => {
                 <button onClick={() => setIsChatOpen(false)} className="absolute -top-12 right-0 w-10 h-10 rounded-full bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10">
                   <X className="w-5 h-5" />
                 </button>
-                <ChatPanel onHighlightProject={handleHighlightProject} />
+                <ChatPanel />
               </motion.div>
             </div>
           </>
