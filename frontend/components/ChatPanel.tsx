@@ -5,6 +5,8 @@ import { Send, Loader2, Paperclip } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
+const MAX_RESUME_CHARS = 6000; // Vercel-safe limit
+
 /**
  * Backend URL resolution
  * - Uses env in prod
@@ -29,9 +31,7 @@ interface Message {
 }
 
 export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
-  /**
-   * Chat messages
-   */
+  // Chat messages
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
@@ -45,16 +45,12 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  /**
-   * resumeId is UI/session identity only
-   */
+  // resumeId is UI/session identity only
   const [resumeId, setResumeId] = useState<string | null>(null);
 
   /**
    * ❗ CRITICAL FIX ❗
    * Resume text must NOT live only in React state.
-   * React state can reset on re-render, animation, hydration, etc.
-   *
    * useRef survives renders and is safe for critical data.
    */
   const resumeTextRef = useRef<string | null>(null);
@@ -62,9 +58,7 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * Auto-scroll on new messages
-   */
+  // Auto-scroll on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -75,7 +69,18 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
   const handleSend = async () => {
     if (!input.trim() || isTyping || !resumeId) return;
 
-    const resumeTextToSend = resumeTextRef.current;
+    const resumeTextRaw = resumeTextRef.current;
+
+    // Hard guard — REQUIRED for TS + runtime safety
+    if (!resumeTextRaw) {
+      console.error("resumeText missing at send time");
+      return;
+    }
+
+    const resumeTextToSend =
+      resumeTextRaw.length > MAX_RESUME_CHARS
+        ? resumeTextRaw.slice(0, MAX_RESUME_CHARS)
+        : resumeTextRaw;
 
     // Hard guard — should never happen, but explicit is better
     if (!resumeTextToSend) {
@@ -102,7 +107,7 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           resume_id: resumeId,
-          resume_text: resumeTextRef.current, // stateless context
+          resume_text: resumeTextToSend, // FIX: send normalized/resilient resume text
           message: userMessage.content,
         }),
       });
@@ -114,12 +119,12 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
         {
           id: (Date.now() + 1).toString(),
           role: 'agent',
-          // FIX: show backend error if present
+          // FIX: show backend error if present,
+          // fallback to 'No response generated.'
           content: data.response ?? data.error ?? 'No response generated.',
           timestamp: new Date(),
         },
       ]);
-
 
       if (data.projectId) {
         onHighlightProject?.(data.projectId);
@@ -185,7 +190,8 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
        * - resumeTextRef → chat context (persistent)
        */
       setResumeId(data.resume_id);
-      resumeTextRef.current = data.extracted_text;
+      // FIX: support both possible backend keys
+      resumeTextRef.current = data.extracted_text ?? data.extractedText ?? null;
 
       setMessages((prev) => {
         const updated = [...prev];
@@ -241,9 +247,7 @@ export const ChatPanel = ({ onHighlightProject }: ChatPanelProps) => {
             >
               <div
                 className={`px-4 py-2 rounded-lg max-w-[80%] text-sm ${
-                  msg.role === 'user'
-                    ? 'bg-primary text-white'
-                    : 'bg-muted'
+                  msg.role === 'user' ? 'bg-primary text-white' : 'bg-muted'
                 }`}
               >
                 {msg.role === 'agent' ? (
