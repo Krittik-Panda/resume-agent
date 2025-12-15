@@ -1,66 +1,106 @@
+// backend/services/agentService.ts
 import { callOpenRouterLLM } from "../adapters/openrouterAdapter";
 
+const MAX_RESUME_CHARS = 20000; // FIX: truncate very long resumes to avoid LLM input limits
+
 export class AgentService {
+  // Keep a small status API so routes can check readiness.
+  static isReady(): boolean {
+    return true;
+  }
+
+  static getAvailableRoles(): string[] {
+    return [
+      "backend-engineer",
+      "frontend-engineer",
+      "full-stack-developer",
+      "devops-engineer",
+    ];
+  }
+
   /**
    * Stateless chat handler.
    * Resume context is provided per request (Vercel-safe).
    */
   static async chat(message: string, resumeText: string): Promise<string> {
     // Defensive guard — never throw here (breaks UX)
-    if (!resumeText || resumeText.trim().length < 10) {
-      console.warn("AgentService.chat called with empty resume text");
+    if (!resumeText || resumeText.trim().length < 5) {
+      console.warn("AgentService.chat called with empty or tiny resume text");
       return "Not found in this resume.";
     }
 
+    // FIX: truncate resume to a safe maximum size before sending to LLM
+    const cleanedResume = resumeText.trim();
+    const resumeToSend =
+      cleanedResume.length > MAX_RESUME_CHARS
+        ? cleanedResume.slice(0, MAX_RESUME_CHARS)
+        : cleanedResume;
+
     console.log(
-      `Processing chat request. Resume text length = ${resumeText.length}`
+      `Processing chat request. Resume text length = ${cleanedResume.length}; sending ${resumeToSend.length}`
     );
 
-    /**
-     * System prompt:
-     * - Hard constraint: ONLY use provided resume
-     * - Deterministic fallback response
-     */
-      const systemPrompt = `
+    // System prompt (strict extraction rules)
+    const systemPrompt = `
       You are a resume Q&A assistant.
 
-      STRICT RULES:
-      - Answer ONLY using facts explicitly written in the resume text.
-      - Do NOT infer strengths, weaknesses, timelines, or experience.
-      - Do NOT summarize or rephrase beyond what is written.
-      - Do NOT guess.
+      RULES:
+      - Use ONLY information present in the resume text.
+      - You MAY map resume sections semantically:
+        - Skills → strengths / what the candidate is good at
+        - Experience → organizations worked for
+        - Projects → work done
+      - Do NOT invent new facts.
+      - Do NOT add anything not supported by the resume.
 
-      If the answer is not explicitly present in the resume, reply EXACTLY:
+      If the answer is not supported by the resume, reply EXACTLY:
       "Not found in this resume."
 
-      FORMATTING RULES:
+      FORMATTING:
       - Use bullet points for lists.
-      - Do NOT add tags like [OUT], [/OUT], [/s], or similar.
+      - Do NOT add tags like [OUT], [/OUT], [/s].
       - Do NOT explain your reasoning.
       `.trim();
 
 
-    /**
-     * User prompt:
-     * - Plain text (avoid JSON noise)
-     * - Clear separation between question and context
-     */
+    // User prompt with clear separators
     const userPrompt = `
 QUESTION:
 ${message}
 
 RESUME CONTENT:
-${resumeText.trim()}
+${resumeToSend}
 `.trim();
 
-    const response = await callOpenRouterLLM(
-      userPrompt,
-      systemPrompt,
-      "resume-chat",
-      {}
-    );
+    try {
+      const response = await callOpenRouterLLM(
+        userPrompt,
+        systemPrompt,
+        "resume-chat",
+        {}
+      );
 
-    // Always return a string — never undefined
-    return response || "Not found in this resume.";
+      // If the LLM returns empty/undefined, use strict fallback
+      if (!response || typeof response !== "string" || response.trim().length === 0) {
+        console.warn("LLM returned empty response; returning strict fallback");
+        return "Not found in this resume.";
+      }
+
+      // Cleaned response passes back to the caller
+      return response.trim();
+    } catch (err: any) {
+      // FIX: handle timeouts / network errors gracefully and log
+      const msg = err?.message?.toLowerCase?.() || "";
+
+      console.error("callOpenRouterLLM failed:", err);
+
+      if (msg.includes("timeout") || msg.includes("aborted") || msg.includes("failed to call openrouter")) {
+        // LLM timed out or aborted — caller could map this to 502 if desired
+        return "LLM timeout";
+      }
+
+      // Generic fallback (do not leak internal errors to users)
+      return "Not found in this resume.";
+    }
   }
 }
